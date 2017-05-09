@@ -215,13 +215,13 @@ int main(int argc, char **argv) {
             exit(-1);
           }
           if (gotindex) {
-            //putchar(colourindex[grey].r);
-            //putchar(colourindex[grey].g);
-            //putchar(colourindex[grey].b);
-			      printf("(%d,%d,%d)", colourindex[grey].r, colourindex[grey].g, colourindex[grey].b);
+			      // printf("(%d,%d,%d)", colourindex[grey].r, colourindex[grey].g, colourindex[grey].b);
+            processValue(&dictionary, &str, r, output, &str_aux);
+            processValue(&dictionary, &str, g, output, &str_aux);
+            processValue(&dictionary, &str, b, output, &str_aux);
           } else {
-            //putchar(grey);
-		        printf("(%d)", grey);
+		        // printf("(%d)", grey);
+            processValue(&dictionary, &str, grey, output, &str_aux);
           }
           break;
         case 24:
