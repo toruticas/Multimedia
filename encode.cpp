@@ -2,6 +2,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <cmath>
+
 #include "encode.h"
 
 unsigned long int __last_index_str__ = -1;
@@ -9,18 +10,18 @@ unsigned long int __last_index_str__ = -1;
 void createDictionary(TDictionary *dictionary, int bits) {
   int i;
   char str[3];
+  TWord word;
 
+  dictionary->bits = bits;
+  dictionary->length = 0;
   dictionary->max_words = (unsigned long int) pow(2, bits);
 
-  fprintf(stderr, "MAX WORD %d\n", dictionary->max_words);
-  dictionary->words = (TWord*) malloc(dictionary->max_words * sizeof(TWord));
-  dictionary->length = 0;
-  dictionary->bits = bits;
+  word.word = (string) malloc(1*sizeof(byte));
+  word.length = 1;
 
   for (i = 0; i < 255; i++) {
-    dictionary->words[dictionary->length].word = (string) malloc(1*sizeof(byte));
-    dictionary->words[dictionary->length].word[0] = (byte) i;
-    dictionary->words[dictionary->length].length = 1;
+    word.word[0] = (byte) i;
+    insert(dictionary->root, word, i);
     dictionary->length++;
   }
 }
@@ -31,38 +32,12 @@ void addToDictionary(TDictionary *dictionary, TWord word) {
     exit(-1);
   }
 
-    // fprintf(stderr, "BEFORE %d ", dictionary->length);
-  dictionary->words[dictionary->length].word = (string) malloc((word.length + 1) * sizeof(byte));
-  // fprintf(stderr, "AFTER ");
-  memcpy(dictionary->words[dictionary->length].word, word.word, word.length);
-  dictionary->words[dictionary->length].length = word.length;
+  insert(dictionary->root, word, dictionary->length);
   dictionary->length++;
 }
 
-unsigned long int presentInDictionary(TDictionary *dictionary, TWord str) {
-  unsigned long int i;
-
-  for (i = 0; i < dictionary->length; i++) {
-    if (compareWords(str, dictionary->words[i]) == true) {
-      return i;
-    }
-  }
-
-  return -1;
-}
-
-bool compareWords(TWord a, TWord b) {
-  int i;
-
-  if (a.length != b.length) {
-    return false;
-  }
-
-  if (memcmp(a.word, b.word, sizeof(a.word)) != 0) {
-    return false;
-  }
-
-  return true;
+int presentInDictionary(TDictionary *dictionary, TWord str) {
+  return search(dictionary->root, str);
 }
 
 void processValue(TDictionary *dictionary, TWord *str, byte newValue, FILE *stream, TWord *aux) {
@@ -110,20 +85,20 @@ void writeData(FILE *stream, unsigned long int index, int bits) {
 /*
  * THIS SECTION IS ONLY FOR ACADEMIC REASONS
  */
-void printDictionary(TDictionary dictionary) {
-  int i;
-
-  for (i = 0; i < dictionary.length; i++) {
-    printWord(dictionary.words[i]);
-  }
-}
-
-void printWord(TWord word) {
-  int i;
-
-  fprintf(stdout, "Word: ");
-  for (i = 0; i < word.length; i++) {
-    fprintf(stdout, "%d ", (int) word.word[i]);
-  }
-  fprintf(stdout, "\n");
-}
+// void printDictionary(TDictionary dictionary) {
+//   int i;
+//
+//   for (i = 0; i < dictionary.length; i++) {
+//     printWord(dictionary.words[i]);
+//   }
+// }
+//
+// void printWord(TWord word) {
+//   int i;
+//
+//   fprintf(stdout, "Word: ");
+//   for (i = 0; i < word.length; i++) {
+//     fprintf(stdout, "%d ", (int) word.word[i]);
+//   }
+//   fprintf(stdout, "\n");
+// }

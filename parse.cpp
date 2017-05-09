@@ -4,6 +4,7 @@
 #include <cmath>
 
 #include "encode.h"
+#include "trie.h"
 
 #define TRUE 1
 #define FALSE 0
@@ -219,8 +220,6 @@ int main(int argc, char **argv) {
   // printDictionary(dictionary);
 
   fprintf(stdout, "\nNumber of words: %d\n", dictionary.length);
-
-  free(dictionary.words);
   fclose(fptr);
 
   return 0;

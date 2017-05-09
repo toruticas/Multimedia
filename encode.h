@@ -1,31 +1,27 @@
 #ifndef ENCODE_H_INCLUDED
 #define ENCODE_H_INCLUDED
 
+#include "trie.h"
+
 #define WORD_BUFFER 100000 // 100kb
 
 typedef unsigned char byte;
 typedef byte *string;
 
 typedef struct {
-  string word;
+  TTrie *root;
   int length;
-} TWord;
-
-typedef struct {
-  TWord *words;
-  unsigned long int length;
-  unsigned long int max_words;
+  int max_words;
   int bits;
 } TDictionary;
 
-void addToDictionary(TDictionary*, TWord);
-unsigned long int presentInDictionary(TDictionary *dictionary, TWord s);
 void createDictionary(TDictionary *dictionary, int bits);
-bool compareWords(TWord, TWord);
+void addToDictionary(TDictionary*, TWord);
+int presentInDictionary(TDictionary *dictionary, TWord s);
 void processValue(TDictionary*, TWord*, byte, FILE*, TWord*);
 void writeData(FILE *stream, unsigned long int index, int bits);
 
-void printDictionary(TDictionary);
-void printWord(TWord);
+// void printDictionary(TDictionary);
+// void printWord(TWord);
 
 #endif
