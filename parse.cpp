@@ -1,8 +1,7 @@
-#include "stdio.h"
-#include "stdlib.h"
-#include "string.h"
-#include "math.h"
-//#include "paulslib.h"
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <cmath>
 
 #include "encode.h"
 
@@ -163,8 +162,8 @@ int main(int argc, char **argv) {
   fwrite(&infoheader, sizeof(INFOHEADER), 1, output);
 
   createDictionary(&dictionary, 10);
-  str_aux.word = malloc(WORD_BUFFER * sizeof(byte));
-  str.word = malloc(WORD_BUFFER * sizeof(byte));
+  str_aux.word = (byte*) malloc(WORD_BUFFER * sizeof(byte));
+  str.word = (byte*) malloc(WORD_BUFFER * sizeof(byte));
   str.length = 0;
 
   /* Read the image */

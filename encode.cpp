@@ -1,7 +1,7 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
+#include <iostream>
+#include <cstdlib>
+#include <cstring>
+#include <cmath>
 #include "encode.h"
 
 unsigned long int __last_index_str__ = -1;
@@ -11,9 +11,9 @@ void createDictionary(TDictionary *dictionary, int bits) {
   char str[3];
 
   dictionary->max_words = (unsigned long int) pow(2, bits);
-  
+
   fprintf(stderr, "MAX WORD %d\n", dictionary->max_words);
-  dictionary->words = malloc(dictionary->max_words * sizeof(TWord));
+  dictionary->words = (TWord*) malloc(dictionary->max_words * sizeof(TWord));
   dictionary->length = 0;
   dictionary->bits = bits;
 
@@ -32,7 +32,7 @@ void addToDictionary(TDictionary *dictionary, TWord word) {
   }
 
     // fprintf(stderr, "BEFORE %d ", dictionary->length);
-  dictionary->words[dictionary->length].word = malloc((word.length + 1) * sizeof(byte));
+  dictionary->words[dictionary->length].word = (string) malloc((word.length + 1) * sizeof(byte));
   // fprintf(stderr, "AFTER ");
   memcpy(dictionary->words[dictionary->length].word, word.word, word.length);
   dictionary->words[dictionary->length].length = word.length;

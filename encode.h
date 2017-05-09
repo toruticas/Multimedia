@@ -2,11 +2,8 @@
 #define ENCODE_H_INCLUDED
 
 #define WORD_BUFFER 100000 // 100kb
-#define true 1
-#define false 0
 
 typedef unsigned char byte;
-typedef byte bool;
 typedef byte *string;
 
 typedef struct {
