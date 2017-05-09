@@ -3,6 +3,9 @@
 #include <cstring>
 #include <cmath>
 
+#include <getopt.h>
+#include <unistd.h>
+
 #include "encode.h"
 
 unsigned long int __last_index_str__ = -1;
@@ -17,11 +20,11 @@ void createDictionary(TDictionary *dictionary, int bits) {
   dictionary->max_words = (unsigned long int) pow(2, bits);
   dictionary->root = getNode();
 
-  word.word = (string) malloc(1*sizeof(byte));
+  word.word = (unsigned char*) malloc(1 * sizeof(unsigned char));
   word.length = 1;
 
   for (i = 0; i < 255; i++) {
-    word.word[0] = (byte) i;
+    word.word[0] = (unsigned char) i;
     insert(dictionary->root, word, i);
     dictionary->length++;
   }
@@ -41,7 +44,7 @@ int presentInDictionary(TDictionary *dictionary, TWord str) {
   return search(dictionary->root, str);
 }
 
-void processValue(TDictionary *dictionary, TWord *str, byte newValue, FILE *stream, TWord *aux) {
+void processValue(TDictionary *dictionary, TWord *str, unsigned char newValue, FILE *stream, TWord *aux) {
   int i;
   unsigned long int index;
 

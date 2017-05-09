@@ -6,7 +6,6 @@
 #define WORD_BUFFER 100000 // 100kb
 
 typedef unsigned char byte;
-typedef byte *string;
 
 typedef struct {
   TTrie *root;

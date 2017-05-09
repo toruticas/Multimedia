@@ -1,13 +1,19 @@
+#include <iostream>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+
 #include <cmath>
+
+#include <unistd.h>
 
 #include "encode.h"
 #include "trie.h"
 
 #define TRUE 1
 #define FALSE 0
+
+using namespace std;
 
 typedef struct {
   unsigned short int type;                 /* Magic identifier            */
@@ -69,6 +75,15 @@ int ReadUShort(FILE *fptr, short unsigned *n, int swap) {
   return(TRUE);
 }
 
+void printHelp(char* executable) {
+  std::cerr << "Usage: " << executable << " [options]\n"
+            << "\t-h,--help\t\tShow this help message\n"
+            << "\t-i, INPUT FILE\tSpecify the destination path of input image bmp\n"
+            << "\t-o, OUTPUT FILE\tSpecify the destination path of output image bin\n"
+            << "\t-n, BITS FILE\tSpecify the size of index"
+            << std::endl;
+}
+
 int main(int argc, char **argv) {
   int i,j;
   int gotindex = FALSE;
@@ -79,15 +94,34 @@ int main(int argc, char **argv) {
   FILE *fptr, *output;
   TDictionary dictionary;
   TWord str, str_aux;
+  int opt, bits;
+  char filename_input[50], filename_output[50];
 
   /* Check arguments */
-  if (argc < 2) {
-    fprintf(stderr,"Usage: %s filename\n",argv[0]);
+  if (argc < 7) {
+    printHelp(argv[0]);
     exit(-1);
   }
 
+  while ((opt = getopt(argc, argv, ":i:o:n:")) != -1) {
+    switch(opt) {
+      case 'i':
+        snprintf(filename_input, 50, "%s", optarg);
+        break;
+      case 'o':
+        snprintf(filename_output, 50, "%s", optarg);
+        break;
+      case 'n':
+        bits = atoi(optarg);
+        break;
+      case ':':
+        printf("-%c without filename\n", optopt);
+        break;
+    }
+  }
+
   /* Open file */
-  if ((fptr = fopen(argv[1],"r")) == NULL) {
+  if ((fptr = fopen(filename_input,"r")) == NULL) {
     fprintf(stderr,"Unable to open BMP file \"%s\"\n",argv[1]);
     exit(-1);
   }
@@ -152,7 +186,7 @@ int main(int argc, char **argv) {
   /* Seek to the start of the image data */
   fseek(fptr,header.offset,SEEK_SET);
 
-  output = fopen("bins/teste.bin", "wb");
+  output = fopen(filename_output, "wb");
 
   if (!output) {
     printf("Unable to open file!");
@@ -162,7 +196,7 @@ int main(int argc, char **argv) {
   fwrite(&header, sizeof(HEADER), 1, output);
   fwrite(&infoheader, sizeof(INFOHEADER), 1, output);
 
-  createDictionary(&dictionary, 30);
+  createDictionary(&dictionary, bits);
   str_aux.word = (byte*) malloc(WORD_BUFFER * sizeof(byte));
   str.word = (byte*) malloc(WORD_BUFFER * sizeof(byte));
   str.length = 0;
@@ -214,9 +248,7 @@ int main(int argc, char **argv) {
     } /* i */
   } /* j */
 
-  // printDictionary(dictionary);
-
-  fprintf(stdout, "\nNumber of words: %d\n", dictionary.length);
+  fprintf(stdout, "Size of dictionary is %d\n", dictionary.length);
   fclose(fptr);
 
   return 0;
