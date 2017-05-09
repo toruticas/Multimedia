@@ -4,10 +4,10 @@
 #include "math.h"
 //#include "paulslib.h"
 
+#include "encode.h"
+
 #define TRUE 1
 #define FALSE 0
-#define DICTIONARY_BUFFER 1024
-#define WORD_BUFFER 1000
 
 typedef struct {
   unsigned short int type;                 /* Magic identifier            */
@@ -31,13 +31,6 @@ typedef struct {
 typedef struct {
   unsigned char r,g,b,junk;
 } COLOURINDEX;
-
-typedef char *string;
-
-typedef struct {
-  string *words;
-  int last_position;
-} TDictionary;
 
 int ReadUInt(FILE *fptr, unsigned int *n, int swap) {
   unsigned char *cptr,tmp;
@@ -76,30 +69,6 @@ int ReadUShort(FILE *fptr, short unsigned *n, int swap) {
   return(TRUE);
 }
 
-void addToDictionary(TDictionary *dictionary, string value) {
-  char *str;
-  str = (string) malloc( strlen(value) * sizeof(char));
-
-  strcpy(str, value);
-  dictionary->words[dictionary->last_position] = str;
-  dictionary->last_position++;
-}
-
-int presentInDictionary(TDictionary dictionary, string s, string ch) {
-  int i;
-  char str[WORD_BUFFER];
-  strcpy(str, s);
-  strcat(str, ch);
-
-  for (i = 0; i < dictionary.last_position; i++) {
-    if (strcmp(dictionary.words[i], str) == 0) {
-      return i;
-    }
-  }
-
-  return -1;
-}
-
 int main(int argc, char **argv) {
   int i,j;
   int gotindex = FALSE;
@@ -109,9 +78,7 @@ int main(int argc, char **argv) {
   COLOURINDEX colourindex[256];
   FILE *fptr;
   TDictionary dictionary;
-  char str[WORD_BUFFER], ch[WORD_BUFFER];
-  int dicionary_pos;
-  // string s, ch;
+  TWord str;
 
   /* Check arguments */
   if (argc < 2) {
@@ -140,6 +107,7 @@ int main(int argc, char **argv) {
     fprintf(stderr,"Failed to read BMP info header\n");
     exit(-1);
   }
+  
   fprintf(stderr,"Image size = %d x %d\n",infoheader.width,infoheader.height);
   fprintf(stderr,"Number of colour planes is %d\n",infoheader.planes);
   fprintf(stderr,"Bits per pixel is %d\n",infoheader.bits);
@@ -184,15 +152,9 @@ int main(int argc, char **argv) {
   /* Seek to the start of the image data */
   fseek(fptr,header.offset,SEEK_SET);
 
-  dictionary.words = malloc(DICTIONARY_BUFFER * sizeof(string*));
-  dictionary.last_position = 0;
-
-  for (i = 0; i < 255; i++) {
-    sprintf(str, "%d", i);
-    addToDictionary(&dictionary, str);
-  }
-
-  strcpy(str, "");
+  createDictionary(&dictionary, 10);
+  str.word = (string) malloc(1 * sizeof(unsigned char));
+  str.length = 0;
 
   /* Read the image */
   for (j = 0 ; j < infoheader.height ; j++) {
@@ -235,23 +197,18 @@ int main(int argc, char **argv) {
           //putchar(b);
 		      // printf("(%d,%d,%d)", r, g, b);
 
-          sprintf(ch, "%d", r);
-          if (presentInDictionary(dictionary, str, ch) != -1) {
-            strcat(str, ch);
-          } else {
-            fprintf(stdout, "%d ", presentInDictionary(dictionary, str, ""));
-            strcat(str, ch);
-            addToDictionary(&dictionary, str);
-            strcpy(str, ch);
-          }
+          processValue(&dictionary, &str, r);
+          processValue(&dictionary, &str, g);
+          processValue(&dictionary, &str, b);
+
           break;
        }
     } /* i */
   } /* j */
-  //
-  // for (i = 0; i < dictionary.last_position; i++) {
-  //   fprintf(stdout, "%d\t | %s\n", i, dictionary.words[i]);
-  // }
+
+  // printDictionary(dictionary);
+
+  fprintf(stdout, "\nNumber of words: %d\n", dictionary.length);
 
   free(dictionary.words);
   fclose(fptr);
