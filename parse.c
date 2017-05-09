@@ -76,9 +76,9 @@ int main(int argc, char **argv) {
   HEADER header;
   INFOHEADER infoheader;
   COLOURINDEX colourindex[256];
-  FILE *fptr;
+  FILE *fptr, *output;
   TDictionary dictionary;
-  TWord str;
+  TWord str, str_aux;
 
   /* Check arguments */
   if (argc < 2) {
@@ -107,7 +107,7 @@ int main(int argc, char **argv) {
     fprintf(stderr,"Failed to read BMP info header\n");
     exit(-1);
   }
-  
+
   fprintf(stderr,"Image size = %d x %d\n",infoheader.width,infoheader.height);
   fprintf(stderr,"Number of colour planes is %d\n",infoheader.planes);
   fprintf(stderr,"Bits per pixel is %d\n",infoheader.bits);
@@ -152,8 +152,19 @@ int main(int argc, char **argv) {
   /* Seek to the start of the image data */
   fseek(fptr,header.offset,SEEK_SET);
 
+  output = fopen("teste.bin", "wb");
+
+  if (!output) {
+    printf("Unable to open file!");
+    return 1;
+  }
+
+  fwrite(&header, sizeof(HEADER), 1, output);
+  fwrite(&infoheader, sizeof(INFOHEADER), 1, output);
+
   createDictionary(&dictionary, 10);
-  str.word = (string) malloc(1 * sizeof(unsigned char));
+  str_aux.word = malloc(WORD_BUFFER * sizeof(byte));
+  str.word = malloc(WORD_BUFFER * sizeof(byte));
   str.length = 0;
 
   /* Read the image */
@@ -197,9 +208,9 @@ int main(int argc, char **argv) {
           //putchar(b);
 		      // printf("(%d,%d,%d)", r, g, b);
 
-          processValue(&dictionary, &str, r);
-          processValue(&dictionary, &str, g);
-          processValue(&dictionary, &str, b);
+          processValue(&dictionary, &str, r, output, &str_aux);
+          processValue(&dictionary, &str, g, output, &str_aux);
+          processValue(&dictionary, &str, b, output, &str_aux);
 
           break;
        }

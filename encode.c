@@ -1,14 +1,21 @@
-#include "stdio.h"
-#include "stdlib.h"
-#include "string.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <math.h>
 #include "encode.h"
 
+unsigned long int __last_index_str__ = -1;
+
 void createDictionary(TDictionary *dictionary, int bits) {
-  byte i;
+  int i;
   char str[3];
 
-  dictionary->words = malloc(1024 * 3000 * sizeof(TWord*));
+  dictionary->max_words = (unsigned long int) pow(2, bits);
+  
+  fprintf(stderr, "MAX WORD %d\n", dictionary->max_words);
+  dictionary->words = malloc(dictionary->max_words * sizeof(TWord));
   dictionary->length = 0;
+  dictionary->bits = bits;
 
   for (i = 0; i < 255; i++) {
     dictionary->words[dictionary->length].word = (string) malloc(1*sizeof(byte));
@@ -19,13 +26,21 @@ void createDictionary(TDictionary *dictionary, int bits) {
 }
 
 void addToDictionary(TDictionary *dictionary, TWord word) {
-  dictionary->words[dictionary->length].word = word.word;
+  if (dictionary->length >= dictionary->max_words) {
+    fprintf(stderr, "Limit of dictionary reached\n");
+    exit(-1);
+  }
+
+    // fprintf(stderr, "BEFORE %d ", dictionary->length);
+  dictionary->words[dictionary->length].word = malloc((word.length + 1) * sizeof(byte));
+  // fprintf(stderr, "AFTER ");
+  memcpy(dictionary->words[dictionary->length].word, word.word, word.length);
   dictionary->words[dictionary->length].length = word.length;
   dictionary->length++;
 }
 
-int presentInDictionary(TDictionary *dictionary, TWord str) {
-  int i;
+unsigned long int presentInDictionary(TDictionary *dictionary, TWord str) {
+  unsigned long int i;
 
   for (i = 0; i < dictionary->length; i++) {
     if (compareWords(str, dictionary->words[i]) == true) {
@@ -43,41 +58,51 @@ bool compareWords(TWord a, TWord b) {
     return false;
   }
 
-  for (i = 0; i < b.length; i++) {
-    if (b.word[i] != a.word[i]) {
-      return false;
-    }
+  if (memcmp(a.word, b.word, sizeof(a.word)) != 0) {
+    return false;
   }
 
   return true;
 }
 
-void processValue(TDictionary *dictionary, TWord *str, byte newValue) {
+void processValue(TDictionary *dictionary, TWord *str, byte newValue, FILE *stream, TWord *aux) {
   int i;
-  TWord aux;
-  aux.word = (string) malloc((str->length + 1) * sizeof(byte));
+  unsigned long int index;
 
-  for (i = 0; i < str->length; i++) {
-    aux.word[i] = str->word[i];
-    aux.length = str->length;
-  }
-  aux.word[str->length] = newValue;
-  aux.length++;
+  memcpy(aux->word, str->word, str->length);
+  aux->word[str->length] = newValue;
+  aux->length = str->length + 1;
 
-  // fprintf(stdout, "NEW VALUE: %d\n", (int) newValue);
-  // fprintf(stdout, "AUX: ");
-  // printWord(aux);
-
-  if (presentInDictionary(dictionary, aux) != -1) {
-    free(str->word);
-    str->word = aux.word;
-    str->length = aux.length;
+  index = presentInDictionary(dictionary, (*aux));
+  if (index != -1) {
+    memcpy(str->word, aux->word, aux->length);
+    str->length = aux->length;
+    __last_index_str__ = index;
   } else {
-    fprintf(stdout, "%d ", presentInDictionary(dictionary, (*str)));
-    addToDictionary(dictionary, aux);
-    // printWord(aux);
+    writeData(stream, __last_index_str__, dictionary->bits);
+    addToDictionary(dictionary, (*aux));
     str->word[0] = newValue;
     str->length = 1;
+    __last_index_str__ = presentInDictionary(dictionary, (*str));
+  }
+}
+
+void writeData(FILE *stream, unsigned long int index, int bits) {
+  unsigned char d_unsigned_char;
+  unsigned short int d_short_int;
+  unsigned int d_int;
+
+  if (bits <= 8) {
+    d_unsigned_char = (unsigned char) index;
+    fwrite(&d_unsigned_char, sizeof(unsigned char), 1, stream);
+  } else if (bits <= 16) {
+    d_short_int = (unsigned short int) index;
+    fwrite(&d_short_int, sizeof(unsigned short int), 1, stream);
+  } else if (bits <= 32) {
+    d_int = (unsigned int) index;
+    fwrite(&index, sizeof(unsigned int), 1, stream);
+  } else {
+    fwrite(&index, sizeof(unsigned long int), 1, stream);
   }
 }
 
