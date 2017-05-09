@@ -4,11 +4,10 @@
 #define ARRAY_SIZE(a) sizeof(a)/sizeof(a[0])
 
 // Alphabet size (# of symbols)
-#define ALPHABET_SIZE (255)
+#define ALPHABET_SIZE (256)
 
 // Converts key current character into index
 // use only 'a' through 'z' and lower case
-#define CHAR_TO_INDEX(c) ((int)c - (int)'a')
 
 typedef struct {
   unsigned char *word;

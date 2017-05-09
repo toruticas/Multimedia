@@ -32,33 +32,32 @@ struct TrieNode *getNode(void) {
 void insert(struct TrieNode *root, TWord key, int dictionary_index) {
     int level;
     int index;
-
     struct TrieNode *pCrawl = root;
+    //
 
     for (level = 0; level < key.length; level++) {
-      index = CHAR_TO_INDEX(key.word[level]);
+      index = key.word[level];
       if (!pCrawl->children[index]) {
         pCrawl->children[index] = getNode();
       }
 
       pCrawl = pCrawl->children[index];
     }
-
-    // mark last node as leaf
+    //
+    // // mark last node as leaf
     pCrawl->index = dictionary_index;
 }
 
-// Returns true if key presents in trie, else false
 int search(struct TrieNode *root, TWord key) {
   int level;
   int index;
   struct TrieNode *pCrawl = root;
 
   for (level = 0; level < key.length; level++) {
-    index = CHAR_TO_INDEX(key.word[level]);
+    index = key.word[level];
 
     if (!pCrawl->children[index]) {
-      return false;
+      return -1;
     }
 
     pCrawl = pCrawl->children[index];

@@ -152,7 +152,7 @@ int main(int argc, char **argv) {
   /* Seek to the start of the image data */
   fseek(fptr,header.offset,SEEK_SET);
 
-  output = fopen("teste.bin", "wb");
+  output = fopen("bins/teste.bin", "wb");
 
   if (!output) {
     printf("Unable to open file!");
@@ -162,7 +162,7 @@ int main(int argc, char **argv) {
   fwrite(&header, sizeof(HEADER), 1, output);
   fwrite(&infoheader, sizeof(INFOHEADER), 1, output);
 
-  createDictionary(&dictionary, 10);
+  createDictionary(&dictionary, 30);
   str_aux.word = (byte*) malloc(WORD_BUFFER * sizeof(byte));
   str.word = (byte*) malloc(WORD_BUFFER * sizeof(byte));
   str.length = 0;
@@ -203,11 +203,8 @@ int main(int argc, char **argv) {
             fprintf(stderr,"Image read failed\n");
             exit(-1);
           }
-          //putchar(r);
-          //putchar(g);
-          //putchar(b);
-		      // printf("(%d,%d,%d)", r, g, b);
 
+		      // printf("(%d,%d,%d)", r, g, b);
           processValue(&dictionary, &str, r, output, &str_aux);
           processValue(&dictionary, &str, g, output, &str_aux);
           processValue(&dictionary, &str, b, output, &str_aux);

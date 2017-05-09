@@ -22,6 +22,6 @@ void processValue(TDictionary*, TWord*, byte, FILE*, TWord*);
 void writeData(FILE *stream, unsigned long int index, int bits);
 
 // void printDictionary(TDictionary);
-// void printWord(TWord);
+void printWord(TWord);
 
 #endif

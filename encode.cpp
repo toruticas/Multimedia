@@ -15,6 +15,7 @@ void createDictionary(TDictionary *dictionary, int bits) {
   dictionary->bits = bits;
   dictionary->length = 0;
   dictionary->max_words = (unsigned long int) pow(2, bits);
+  dictionary->root = getNode();
 
   word.word = (string) malloc(1*sizeof(byte));
   word.length = 1;
@@ -55,6 +56,7 @@ void processValue(TDictionary *dictionary, TWord *str, byte newValue, FILE *stre
     __last_index_str__ = index;
   } else {
     writeData(stream, __last_index_str__, dictionary->bits);
+    // fprintf(stderr, "%d ", __last_index_str__);
     addToDictionary(dictionary, (*aux));
     str->word[0] = newValue;
     str->length = 1;
@@ -93,12 +95,12 @@ void writeData(FILE *stream, unsigned long int index, int bits) {
 //   }
 // }
 //
-// void printWord(TWord word) {
-//   int i;
-//
-//   fprintf(stdout, "Word: ");
-//   for (i = 0; i < word.length; i++) {
-//     fprintf(stdout, "%d ", (int) word.word[i]);
-//   }
-//   fprintf(stdout, "\n");
-// }
+void printWord(TWord word) {
+  int i;
+
+  fprintf(stdout, "Word: ");
+  for (i = 0; i < word.length; i++) {
+    fprintf(stdout, "%d ", (int) word.word[i]);
+  }
+  fprintf(stdout, "\n");
+}
