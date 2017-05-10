@@ -3,26 +3,26 @@
 
 #define ARRAY_SIZE(a) sizeof(a)/sizeof(a[0])
 
-// Alphabet size (# of symbols)
-#define ALPHABET_SIZE (256)
+// Size of Alphabet
+#define ALPHABET_SIZE 256
 
-// Converts key current character into index
-// use only 'a' through 'z' and lower case
-
+// This struct represents a string with alphabet composed by 255 characters
 typedef struct {
   unsigned char *word;
   int length;
 } TWord;
 
-// trie node
+// Tire Node
 typedef struct TrieNode {
   struct TrieNode *children[ALPHABET_SIZE];
   int index;
 } TTrie;
 
+// Get a new node from Trie
 TTrie *getNode(void);
-void insert(TTrie *root, TWord key, int index);
-int search(TTrie *root, TWord key);
-
+// Insert a word in Trie
+void insert(TTrie*, TWord, int);
+// Search a word in Trie
+int search(TTrie*, TWord);
 
 #endif

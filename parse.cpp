@@ -133,8 +133,8 @@ int main(int argc, char **argv) {
   fwrite(&infoheader, sizeof(INFOHEADER), 1, output);
 
   createDictionary(&dictionary, bits);
-  str_aux.word = (byte*) malloc(WORD_BUFFER * sizeof(byte));
-  str.word = (byte*) malloc(WORD_BUFFER * sizeof(byte));
+  str_aux.word = (unsigned char*) malloc(WORD_BUFFER * sizeof(unsigned char));
+  str.word = (unsigned char*) malloc(WORD_BUFFER * sizeof(unsigned char));
   str.length = 0;
 
   /* Read the image */

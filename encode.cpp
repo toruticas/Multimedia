@@ -10,6 +10,7 @@
 
 unsigned long int __last_index_str__ = -1;
 
+// Implement dictionary with Trie add the initial alphabet
 void createDictionary(TDictionary *dictionary, int bits) {
   int i;
   char str[3];
@@ -30,6 +31,7 @@ void createDictionary(TDictionary *dictionary, int bits) {
   }
 }
 
+// Add a new word to dictionary
 void addToDictionary(TDictionary *dictionary, TWord word) {
   if (dictionary->length >= dictionary->max_words) {
     fprintf(stderr, "Limit of dictionary reached\n");
@@ -40,10 +42,12 @@ void addToDictionary(TDictionary *dictionary, TWord word) {
   dictionary->length++;
 }
 
+// Check if a word is present in dictionary
 int presentInDictionary(TDictionary *dictionary, TWord str) {
   return search(dictionary->root, str);
 }
 
+// Implement pseudo code of LZW algorithm
 void processValue(TDictionary *dictionary, TWord *str, unsigned char newValue, FILE *stream, TWord *aux) {
   int i;
   unsigned long int index;
@@ -67,6 +71,7 @@ void processValue(TDictionary *dictionary, TWord *str, unsigned char newValue, F
   }
 }
 
+// write data in oputfile
 void writeData(FILE *stream, unsigned long int index, int bits) {
   unsigned char d_unsigned_char;
   unsigned short int d_short_int;
@@ -84,26 +89,4 @@ void writeData(FILE *stream, unsigned long int index, int bits) {
   } else {
     fwrite(&index, sizeof(unsigned long int), 1, stream);
   }
-}
-
-
-/*
- * THIS SECTION IS ONLY FOR ACADEMIC REASONS
- */
-// void printDictionary(TDictionary dictionary) {
-//   int i;
-//
-//   for (i = 0; i < dictionary.length; i++) {
-//     printWord(dictionary.words[i]);
-//   }
-// }
-//
-void printWord(TWord word) {
-  int i;
-
-  fprintf(stdout, "Word: ");
-  for (i = 0; i < word.length; i++) {
-    fprintf(stdout, "%d ", (int) word.word[i]);
-  }
-  fprintf(stdout, "\n");
 }

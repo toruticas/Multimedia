@@ -27,7 +27,7 @@ typedef struct {
   unsigned char r,g,b,junk;
 } COLOURINDEX;
 
-int ReadUInt(FILE *fptr, unsigned int *n, int swap);
-int ReadUShort(FILE *fptr, short unsigned *n, int swap);
+int ReadUInt(FILE*, unsigned int*, int);
+int ReadUShort(FILE*, short unsigned*, int);
 
 #endif

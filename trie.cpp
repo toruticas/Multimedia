@@ -48,6 +48,7 @@ void insert(struct TrieNode *root, TWord key, int dictionary_index) {
     pCrawl->index = dictionary_index;
 }
 
+// Returns the position of a word or -1 if not found
 int search(struct TrieNode *root, TWord key) {
   int level;
   int index;

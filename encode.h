@@ -5,8 +5,7 @@
 
 #define WORD_BUFFER 100000 // 100kb
 
-typedef unsigned char byte;
-
+// Define a structure of dictionary based in Trie
 typedef struct {
   TTrie *root;
   int length;
@@ -14,13 +13,15 @@ typedef struct {
   int bits;
 } TDictionary;
 
-void createDictionary(TDictionary *dictionary, int bits);
+// Build a dictionary made with Trie
+void createDictionary(TDictionary*, int);
+// Add a word to dictionary
 void addToDictionary(TDictionary*, TWord);
-int presentInDictionary(TDictionary *dictionary, TWord s);
-void processValue(TDictionary*, TWord*, byte, FILE*, TWord*);
-void writeData(FILE *stream, unsigned long int index, int bits);
-
-// void printDictionary(TDictionary);
-void printWord(TWord);
+// Check if a word is present in dictionary
+int presentInDictionary(TDictionary*, TWord);
+// Process a newValue in LZW interaction
+void processValue(TDictionary*, TWord*, unsigned char, FILE*, TWord*);
+// Write data in output file
+void writeData(FILE*, unsigned long int, int);
 
 #endif
