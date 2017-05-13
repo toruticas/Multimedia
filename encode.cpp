@@ -8,7 +8,7 @@
 
 #include "encode.h"
 
-unsigned long int __last_index_str__ = -1;
+int __last_index_str__ = -1;
 
 // Implement dictionary with Trie add the initial alphabet
 void createDictionary(TDictionary *dictionary, int bits) {
@@ -48,7 +48,7 @@ int presentInDictionary(TDictionary *dictionary, TWord str) {
 }
 
 // Implement pseudo code of LZW algorithm
-void processValue(TDictionary *dictionary, TWord *str, unsigned char newValue, FILE *stream, TWord *aux) {
+void processValue(TDictionary *dictionary, TWord *str, unsigned char newValue, TFileManager *stream, TWord *aux) {
   int i;
   unsigned long int index;
 
@@ -62,31 +62,12 @@ void processValue(TDictionary *dictionary, TWord *str, unsigned char newValue, F
     str->length = aux->length;
     __last_index_str__ = index;
   } else {
-    writeData(stream, __last_index_str__, dictionary->bits);
+    addIndex(stream, __last_index_str__);
+    // writeData(stream, __last_index_str__, dictionary->bits);
     // fprintf(stderr, "%d ", __last_index_str__);
     addToDictionary(dictionary, (*aux));
     str->word[0] = newValue;
     str->length = 1;
     __last_index_str__ = presentInDictionary(dictionary, (*str));
-  }
-}
-
-// write data in oputfile
-void writeData(FILE *stream, unsigned long int index, int bits) {
-  unsigned char d_unsigned_char;
-  unsigned short int d_short_int;
-  unsigned int d_int;
-
-  if (bits <= 8) {
-    d_unsigned_char = (unsigned char) index;
-    fwrite(&d_unsigned_char, sizeof(unsigned char), 1, stream);
-  } else if (bits <= 16) {
-    d_short_int = (unsigned short int) index;
-    fwrite(&d_short_int, sizeof(unsigned short int), 1, stream);
-  } else if (bits <= 32) {
-    d_int = (unsigned int) index;
-    fwrite(&index, sizeof(unsigned int), 1, stream);
-  } else {
-    fwrite(&index, sizeof(unsigned long int), 1, stream);
   }
 }

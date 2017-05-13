@@ -30,6 +30,7 @@ int main(int argc, char **argv) {
   FILE *fptr, *output;
   TDictionary dictionary;
   TWord str, str_aux;
+  TFileManager filemanager;
   int opt, bits;
   char filename_input[50], filename_output[50];
 
@@ -133,6 +134,7 @@ int main(int argc, char **argv) {
   fwrite(&infoheader, sizeof(INFOHEADER), 1, output);
 
   createDictionary(&dictionary, bits);
+  filemanager = createFileManager(bits);
   str_aux.word = (unsigned char*) malloc(WORD_BUFFER * sizeof(unsigned char));
   str.word = (unsigned char*) malloc(WORD_BUFFER * sizeof(unsigned char));
   str.length = 0;
@@ -152,12 +154,12 @@ int main(int argc, char **argv) {
           }
           if (gotindex) {
 			      // printf("(%d,%d,%d)", colourindex[grey].r, colourindex[grey].g, colourindex[grey].b);
-            processValue(&dictionary, &str, r, output, &str_aux);
-            processValue(&dictionary, &str, g, output, &str_aux);
-            processValue(&dictionary, &str, b, output, &str_aux);
+            processValue(&dictionary, &str, r, &filemanager, &str_aux);
+            processValue(&dictionary, &str, g, &filemanager, &str_aux);
+            processValue(&dictionary, &str, b, &filemanager, &str_aux);
           } else {
 		        // printf("(%d)", grey);
-            processValue(&dictionary, &str, grey, output, &str_aux);
+            processValue(&dictionary, &str, grey, &filemanager, &str_aux);
           }
           break;
         case 24:
@@ -175,9 +177,9 @@ int main(int argc, char **argv) {
           }
 
 		      // printf("(%d,%d,%d)", r, g, b);
-          processValue(&dictionary, &str, r, output, &str_aux);
-          processValue(&dictionary, &str, g, output, &str_aux);
-          processValue(&dictionary, &str, b, output, &str_aux);
+          processValue(&dictionary, &str, r, &filemanager, &str_aux);
+          processValue(&dictionary, &str, g, &filemanager, &str_aux);
+          processValue(&dictionary, &str, b, &filemanager, &str_aux);
 
           break;
        }
@@ -185,6 +187,7 @@ int main(int argc, char **argv) {
   } /* j */
 
   fprintf(stdout, "Size of dictionary is %d\n", dictionary.length);
+  writeFile(output, filemanager);
   fclose(fptr);
 
   return 0;

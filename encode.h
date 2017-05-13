@@ -1,6 +1,7 @@
 #ifndef ENCODE_H_INCLUDED
 #define ENCODE_H_INCLUDED
 
+#include "filemanager.h"
 #include "trie.h"
 
 #define WORD_BUFFER 100000 // 100kb
@@ -20,7 +21,7 @@ void addToDictionary(TDictionary*, TWord);
 // Check if a word is present in dictionary
 int presentInDictionary(TDictionary*, TWord);
 // Process a newValue in LZW interaction
-void processValue(TDictionary*, TWord*, unsigned char, FILE*, TWord*);
+void processValue(TDictionary*, TWord*, unsigned char, TFileManager*, TWord*);
 // Write data in output file
 void writeData(FILE*, unsigned long int, int);
 
