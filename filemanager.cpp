@@ -17,88 +17,79 @@ void addIndex(TFileManager *file, int index) {
   file->length++;
 }
 
-// write data in oputfile
-void writeFile(FILE *stream, TFileManager filemanager) {
-  unsigned char byte;
-  unsigned short int d_short_int;
-  int d_int, i;
-  int bits_left = 0;
 
-  int x = 65536;
-  unsigned char *y = (unsigned char*) &x;
-  fprintf(stderr, "0x%x | 0x%x | 0x%x | 0x%x\n\n", (int) *(y), (int) *(y + 1), (int) *(y + 2), (int) *(y + 3));
-  unsigned char *position;
-
-  unsigned char total_to_analyze = 0;
-  unsigned char bits_in_byte_used = 0;
-  unsigned char buffer_byte = 0;
-
-  for (i = 0; i < filemanager.length; i++) {
-    // d_int = (int) filemanager.buffer[i];
-    // fwrite(&filemanager.buffer[i], sizeof(int), 1, stream);
-
-    total_to_analyze = filemanager.bits;
-
-    if (filemanager.bits < 16) {
-      // pass two bytes more relevant of integer because integer aways will be more longer than the size of alphabet
-      position = (unsigned char*) &filemanager.buffer[i];
-      analyze(stream, &buffer_byte, (unsigned char) *position, &bits_in_byte_used, &total_to_analyze);
-      analyze(stream, &buffer_byte, (unsigned char) *(position + 1), &bits_in_byte_used, &total_to_analyze);
-    } else if (filemanager.bits < 24) {
-      // pass three bytes of integer
-      analyze(stream, &buffer_byte, (unsigned char) *position, &bits_in_byte_used, &total_to_analyze);
-      analyze(stream, &buffer_byte, (unsigned char) *(position + 1), &bits_in_byte_used, &total_to_analyze);
-      analyze(stream, &buffer_byte, (unsigned char) *(position + 2), &bits_in_byte_used, &total_to_analyze);
-    } else {
-      // pass the four bytes of integer
-      analyze(stream, &buffer_byte, (unsigned char) *position, &bits_in_byte_used, &total_to_analyze);
-      analyze(stream, &buffer_byte, (unsigned char) *(position + 1), &bits_in_byte_used, &total_to_analyze);
-      analyze(stream, &buffer_byte, (unsigned char) *(position + 2), &bits_in_byte_used, &total_to_analyze);
-      analyze(stream, &buffer_byte, (unsigned char) *(position + 3), &bits_in_byte_used, &total_to_analyze);
-    }
-  }
-
-  fwrite(&buffer_byte, sizeof(unsigned char), 1, stream);
-  // write in file here "buffer_byte"
-  // fwrite(buffer_byte, sizeof(unsigned char), 1, stream);
+bit_filter b_attach(FILE *f) {
+	bit_filter b = (bit_filter) malloc(sizeof(bit_io_t));
+	b->bits = b->accu = 0;
+	b->fp = f;
+	return b;
 }
 
-void analyze(FILE *stream, unsigned char *buffer_byte, unsigned char current_byte, unsigned char *bits_in_byte_used, unsigned char *total_to_analyze) {
-  unsigned char current_byte_copy = current_byte;
-  unsigned char full_byte = 255;
+void b_detach(bit_filter bf) {
+	if (bf->bits) {
+		bf->accu <<= 8 - bf->bits;
+		fputc(bf->accu, bf->fp);
+	}
+	free(bf);
+}
 
-  // fprintf(stderr, "%d:", (unsigned char) current_byte);
-  // fprintf(stderr, "%d:", (unsigned char) *bits_in_byte_used);
-  // fprintf(stderr, "%d ", (unsigned char) *total_to_analyze);
-  if (*bits_in_byte_used == 0) {
-    *buffer_byte = current_byte;
+void b_write(byte *buf, size_t n_bits, size_t shift, bit_filter bf) {
+	uint32_t accu = bf->accu;
+	int bits = bf->bits;
 
-    if (*total_to_analyze < 8) {
-      *bits_in_byte_used = *total_to_analyze;
-      *total_to_analyze = 0;
-    } else {
-      *bits_in_byte_used = 0;
-      *total_to_analyze = *total_to_analyze - 8;
-      // write in file here "buffer_byte"
-      fwrite(buffer_byte, sizeof(unsigned char), 1, stream);
+	buf += shift / 8;
+	shift %= 8;
+
+	while (n_bits || bits >= 8) {
+		while (bits >= 8) {
+			bits -= 8;
+			fputc(accu >> bits, bf->fp);
+			accu &= (1 << bits) - 1;
+		}
+		while (bits < 8 && n_bits) {
+			accu = (accu << 1) | (((128 >> shift) & *buf) >> (7 - shift));
+			--n_bits;
+			bits++;
+			if (++shift == 8) {
+				shift = 0;
+				buf++;
+			}
+		}
+	}
+	bf->accu = accu;
+	bf->bits = bits;
+}
+
+void writeFile(FILE *f, TFileManager filemanager) {
+    unsigned char *position;
+    int i, aux;
+
+    bit_filter b = b_attach(f);
+
+    for (i = 0; i < filemanager.length; i++) {
+        position = (unsigned char*) &filemanager.buffer[i];
+        b_write(position, 8, 0, b);
+
+        if (filemanager.bits < 16) {
+            aux = (16 - filemanager.bits) % 8;
+            b_write(position + 1, 8 - aux, aux, b);
+        } else {
+            b_write(position, 8, 0, b);
+
+            if (filemanager.bits >= 16 && filemanager.bits < 24) {
+                aux = (24 - filemanager.bits) % 8;
+                b_write(position + 1, 8 - aux, aux, b);
+            } else {
+                b_write(position, 8, 0, b);
+
+                if (filemanager.bits >= 24) {
+                    aux = 32 - filemanager.bits;
+                    b_write(position + 1, 8 - aux, aux, b);
+                } else {
+                    b_write(position, 8, 0, b);
+                }
+            }
+        }
     }
-  } else {
-    if (*bits_in_byte_used + *total_to_analyze <= 8) {
-      current_byte << *bits_in_byte_used;
-      *buffer_byte = *buffer_byte | current_byte;
-      total_to_analyze = 0;
-      *bits_in_byte_used = *bits_in_byte_used + *total_to_analyze;
-      // fprintf(stderr, "NUNCA ENTROU AQUI3");
-    } else {
-      current_byte_copy << *bits_in_byte_used;
-      *buffer_byte = *buffer_byte | current_byte;
-      *bits_in_byte_used = 8 - *bits_in_byte_used;
-      *total_to_analyze = *total_to_analyze - *bits_in_byte_used;
-      // fprintf(stderr, "NUNCA ENTROU AQUI4");
-      // write in file here "buffer_byte"
-      fwrite(buffer_byte, sizeof(unsigned char), 1, stream);
-      current_byte >> *bits_in_byte_used;
-      *buffer_byte = full_byte & current_byte;
-    }
-  }
+	b_detach(b);
 }
